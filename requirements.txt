@@ -1,6 +1,0 @@
-tensorflow
-numpy
-pandas
-opencv-python
-scikit-learn
-flask
