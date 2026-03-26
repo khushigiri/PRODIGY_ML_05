@@ -1,5 +1,4 @@
-keras==2.13.1
-h5py
+streamlit
 numpy
 pillow
-streamlit
+tflite-runtime
