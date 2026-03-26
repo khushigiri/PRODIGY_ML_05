@@ -34,7 +34,6 @@ test_data = test_gen.flow_from_directory(
     class_mode='categorical'
 )
 
-# Model (Better than basic CNN)
 base_model = tf.keras.applications.MobileNetV2(
     input_shape=(224, 224, 3),
     include_top=False,
@@ -56,21 +55,17 @@ model.compile(
     metrics=['accuracy']
 )
 
-# Train
 model.fit(
     train_data,
     epochs=5,
     validation_data=val_data
 )
 
-# Save model
 os.makedirs("model", exist_ok=True)
 model.save("model/food_model.h5")
 
-# Save class labels
 with open("model/class_labels.pkl", "wb") as f:
     pickle.dump(train_data.class_indices, f)
 
-# Evaluate
 loss, acc = model.evaluate(test_data)
 print("Test Accuracy:", acc)

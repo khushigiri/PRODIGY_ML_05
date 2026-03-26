@@ -4,14 +4,11 @@ from tensorflow.keras.models import load_model
 from utils.preprocess import preprocess_image
 from utils.calorie_data import calories_dict
 
-# Load model
 model = load_model("model/food_model.h5")
 
-# Load class labels
 with open("model/class_labels.pkl", "rb") as f:
     class_indices = pickle.load(f)
 
-# Convert index → label
 class_labels = list(class_indices.keys())
 
 def predict_food(img_path):
@@ -23,6 +20,4 @@ def predict_food(img_path):
     food = class_labels[class_index]
     calories = calories_dict.get(food, "Unknown")
 
-    confidence = float(np.max(prediction))
-
-    return food, calories, confidence
+    return food, calories, 
