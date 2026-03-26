@@ -1,6 +1,4 @@
-tensorflow==2.13.0
-numpy
-pandas
-pillow
+tensorflow-cpu==2.13.0
 streamlit
-scikit-learn
+numpy
+pillow
