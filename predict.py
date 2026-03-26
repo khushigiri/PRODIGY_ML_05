@@ -4,7 +4,7 @@ import tflite_runtime.interpreter as tflite
 from utils.preprocess import preprocess_image
 from utils.calorie_data import calories_dict
 
-interpreter = tflite.Interpreter(model_path="model/model.tflite")
+interpreter = tflite.Interpreter(model_path="model/food_model.tflite")
 interpreter.allocate_tensors()
 
 input_details = interpreter.get_input_details()
