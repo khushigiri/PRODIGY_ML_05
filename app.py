@@ -66,21 +66,19 @@ def index():
     image_path = None
 
     if request.method == "POST":
-        try:
-            file = request.files["file"]
+        print("POST request received")
 
-            if file and file.filename:
-                filename = file.filename
-                filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-                file.save(filepath)
+        file = request.files.get("file")
 
-                prediction, calories = predict_food(filepath)
+        if file and file.filename:
+            filename = file.filename
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            file.save(filepath)
 
-                # browser-friendly static path
-                image_path = f"uploads/{filename}"
+            prediction, calories = predict_food(filepath)
+            image_path = f"uploads/{filename}"
 
-        except Exception as e:
-            print("UPLOAD ERROR:", str(e))
+            print("Prediction:", prediction)
 
     return render_template(
         "index.html",
