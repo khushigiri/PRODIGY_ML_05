@@ -66,8 +66,6 @@ def index():
     image_path = None
 
     if request.method == "POST":
-        print("POST request received")
-
         file = request.files.get("file")
 
         if file and file.filename:
@@ -77,8 +75,6 @@ def index():
 
             prediction, calories = predict_food(filepath)
             image_path = f"uploads/{filename}"
-
-            print("Prediction:", prediction)
 
     return render_template(
         "index.html",

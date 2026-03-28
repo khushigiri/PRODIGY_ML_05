@@ -1,30 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Food Calorie Estimator</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-            rel="stylesheet">
         <link rel="stylesheet"
             href="{{ url_for('static', filename='style.css') }}">
     </head>
-    <script>
-    const form = document.querySelector("form");
-    const spinner = document.getElementById("loadingSpinner");
-
-    form.addEventListener("submit", () => {
-        spinner.style.display = "block";
-    });
-</script>
     <body>
         <div class="card">
             <div class="title">🍽 Food Calorie Estimator</div>
             <div class="subtitle">Upload a food image and get instant calorie
-                insights powered by TensorFlow</div>
+                insights</div>
 
             <form method="POST" enctype="multipart/form-data">
                 <div class="upload-box">
@@ -33,13 +20,13 @@
                     <br>
                     <button class="btn" type="submit">Predict Calories</button>
                 </div>
-            </form>43
-            <div class="spinner" id="loadingSpinner"></div>
+            </form>
+
             {% if prediction %}
             <div class="result">
                 <div class="preview">
                     <img src="{{ url_for('static', filename=image_path) }}"
-                        alt="Uploaded image">
+                        alt="Food image">
                 </div>
                 <div class="stats">
                     <div class="stat-box">
