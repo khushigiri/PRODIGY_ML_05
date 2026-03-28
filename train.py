@@ -66,7 +66,7 @@ class_labels = list(train_data.class_indices.keys())
 with open(os.path.join(MODEL_DIR, "class_labels.pkl"), "wb") as f:
     pickle.dump(class_labels, f)
 
-print("✅ Class labels saved!")
+print("Class labels saved!")
 
 # -------------------------------
 # 🧠 Load Base Model
@@ -116,13 +116,13 @@ history = model.fit(
 # 💾 Save Model
 # -------------------------------
 model.save(os.path.join(MODEL_DIR, "food_model.keras"))
-print("\n✅ Model saved successfully!")
+print("\nModel saved successfully!")
 
 # -------------------------------
 # 📊 Evaluate Model
 # -------------------------------
 loss, accuracy = model.evaluate(eval_data)
-print(f"\n📊 Evaluation Accuracy: {accuracy * 100:.2f}%")
+print(f"\nEvaluation Accuracy: {accuracy * 100:.2f}%")
 
 # -------------------------------
 # 📈 Predictions
@@ -136,11 +136,11 @@ labels = list(eval_data.class_indices.keys())
 # -------------------------------
 # 📋 Classification Report
 # -------------------------------
-print("\n📊 Classification Report:")
+print("\nClassification Report:")
 print(classification_report(y_true, y_pred, target_names=labels))
 
 # -------------------------------
 # 🔲 Confusion Matrix
 # -------------------------------
-print("\n📊 Confusion Matrix:")
+print("\nConfusion Matrix:")
 print(confusion_matrix(y_true, y_pred))

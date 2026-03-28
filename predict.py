@@ -2,48 +2,53 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.keras.preprocessing import image
 import pickle
+import os
 
-# Load model
+# Load trained model
 model = tf.keras.models.load_model(
     "model/food_model.keras",
     compile=False
 )
 
-# Load labels
+# Load class labels
 with open("model/class_labels.pkl", "rb") as f:
     class_labels = pickle.load(f)
 
 # Calorie mapping
-calorie_dict = {
+calorie_map = {
     "bread": 265,
     "dairy_product": 150,
-    "dessert": 300,
+    "dessert": 350,
     "egg": 155,
     "fried_food": 320,
     "meat": 250,
-    "noodles_pasta": 158,
-    "rice": 130,
-    "seafood": 206,
-    "soup": 80,
-    "vegetable_fruit": 50
+    "noodles_pasta": 300,
+    "rice": 200,
+    "sea_food": 220,
+    "soup": 120,
+    "vegetable_fruit": 80
 }
 
-def predict_food(img_path):
-    img = image.load_img(img_path, target_size=(224, 224))
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0) / 255.0
+# Get image path
+img_path = input("Enter image path: ").strip()
 
-    prediction = model.predict(img_array)
-    predicted_class = class_labels[np.argmax(prediction)]
+if not os.path.exists(img_path):
+    print("Image path not found!")
+    exit()
 
-    calories = calorie_dict.get(predicted_class, "Unknown")
+# Preprocess image
+img = image.load_img(img_path, target_size=(224, 224))
+img_array = image.img_to_array(img) / 255.0
+img_array = np.expand_dims(img_array, axis=0)
 
-    return predicted_class, calories
+# Prediction
+prediction = model.predict(img_array, verbose=0)
+predicted_class = class_labels[np.argmax(prediction)]
+confidence = np.max(prediction) * 100
+calories = calorie_map.get(predicted_class, "Unknown")
 
-
-if __name__ == "__main__":
-    img_path = input("Enter image path: ")
-    food, calories = predict_food(img_path)
-
-    print(f"\n🍽 Predicted Food: {food}")
-    print(f"🔥 Estimated Calories: {calories} kcal")
+# Output
+print("\nPrediction Result")
+print(f"Food Item      : {predicted_class}")
+print(f"Calories       : {calories} kcal")
+print(f"Confidence     : {confidence:.2f}%")
