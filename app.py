@@ -55,10 +55,9 @@ def predict_food(img_path):
 
     prediction = model.predict(img_array)
     predicted_class = class_labels[np.argmax(prediction)]
-    calories = calorie_map[predicted_class]
+    calories = calorie_map.get(predicted_class, "Unknown")
 
     return predicted_class, calories
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -67,14 +66,21 @@ def index():
     image_path = None
 
     if request.method == "POST":
-        file = request.files["file"]
+        try:
+            file = request.files["file"]
 
-        if file:
-            filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
-            file.save(filepath)
+            if file and file.filename:
+                filename = file.filename
+                filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                file.save(filepath)
 
-            prediction, calories = predict_food(filepath)
-            image_path = filepath
+                prediction, calories = predict_food(filepath)
+
+                # browser-friendly static path
+                image_path = f"uploads/{filename}"
+
+        except Exception as e:
+            print("UPLOAD ERROR:", str(e))
 
     return render_template(
         "index.html",
@@ -82,7 +88,6 @@ def index():
         calories=calories,
         image_path=image_path
     )
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
