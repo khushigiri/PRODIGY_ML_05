@@ -1,11 +1,9 @@
 import tensorflow as tf
 
+# Load old model
 model = tf.keras.models.load_model("model/food_model.h5")
 
-converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
+# Save in new format
+model.save("model/food_model.keras")
 
-with open("model/food_model.tflite", "wb") as f:
-    f.write(tflite_model)
-
-print("Model converted to TFLite successfully!")
+print("✅ Converted successfully!")

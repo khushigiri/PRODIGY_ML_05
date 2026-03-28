@@ -1,71 +1,146 @@
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras import layers, models
+import numpy as np
 import pickle
 import os
 
-# Paths
-train_dir = "dataset/training"
-val_dir = "dataset/validation"
-test_dir = "dataset/evaluation"
+from sklearn.metrics import classification_report, confusion_matrix
 
-# Data Generators
-train_gen = ImageDataGenerator(rescale=1./255)
-val_gen = ImageDataGenerator(rescale=1./255)
-test_gen = ImageDataGenerator(rescale=1./255)
+# -------------------------------
+# 📁 Paths
+# -------------------------------
+TRAIN_DIR = "dataset/training"
+VAL_DIR = "dataset/validation"
+EVAL_DIR = "dataset/evaluation"
+MODEL_DIR = "model"
 
-train_data = train_gen.flow_from_directory(
-    train_dir,
-    target_size=(224, 224),
-    batch_size=32,
-    class_mode='categorical'
+IMG_SIZE = (224, 224)
+BATCH_SIZE = 32
+EPOCHS = 10
+
+# Create model directory if not exists
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+# -------------------------------
+# 📊 Data Generators
+# -------------------------------
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=20,
+    zoom_range=0.2,
+    horizontal_flip=True
 )
 
-val_data = val_gen.flow_from_directory(
-    val_dir,
-    target_size=(224, 224),
-    batch_size=32,
-    class_mode='categorical'
+val_datagen = ImageDataGenerator(rescale=1./255)
+eval_datagen = ImageDataGenerator(rescale=1./255)
+
+train_data = train_datagen.flow_from_directory(
+    TRAIN_DIR,
+    target_size=IMG_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode="categorical"
 )
 
-test_data = test_gen.flow_from_directory(
-    test_dir,
-    target_size=(224, 224),
-    batch_size=32,
-    class_mode='categorical'
+val_data = val_datagen.flow_from_directory(
+    VAL_DIR,
+    target_size=IMG_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode="categorical"
 )
 
-base_model = tf.keras.applications.MobileNetV2(
-    input_shape=(224, 224, 3),
+eval_data = eval_datagen.flow_from_directory(
+    EVAL_DIR,
+    target_size=IMG_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode="categorical",
+    shuffle=False
+)
+
+# -------------------------------
+# 🏷 Save Class Labels
+# -------------------------------
+class_labels = list(train_data.class_indices.keys())
+
+with open(os.path.join(MODEL_DIR, "class_labels.pkl"), "wb") as f:
+    pickle.dump(class_labels, f)
+
+print("✅ Class labels saved!")
+
+# -------------------------------
+# 🧠 Load Base Model
+# -------------------------------
+base_model = MobileNetV2(
+    weights="imagenet",
     include_top=False,
-    weights='imagenet'
+    input_shape=(224, 224, 3)
 )
 
+# Freeze base model
 base_model.trainable = False
 
-x = base_model.output
-x = tf.keras.layers.GlobalAveragePooling2D()(x)
-x = tf.keras.layers.Dense(128, activation='relu')(x)
-output = tf.keras.layers.Dense(train_data.num_classes, activation='softmax')(x)
+# -------------------------------
+# 🏗 Build Model
+# -------------------------------
+model = models.Sequential([
+    base_model,
+    layers.GlobalAveragePooling2D(),
+    layers.BatchNormalization(),
+    layers.Dense(128, activation="relu"),
+    layers.Dropout(0.3),
+    layers.Dense(len(class_labels), activation="softmax")
+])
 
-model = tf.keras.Model(inputs=base_model.input, outputs=output)
-
+# -------------------------------
+# ⚙ Compile Model
+# -------------------------------
 model.compile(
-    optimizer='adam',
-    loss='categorical_crossentropy',
-    metrics=['accuracy']
+    optimizer="adam",
+    loss="categorical_crossentropy",
+    metrics=["accuracy"]
 )
 
-model.fit(
+model.summary()
+
+# -------------------------------
+# 🚀 Train Model
+# -------------------------------
+history = model.fit(
     train_data,
-    epochs=5,
-    validation_data=val_data
+    validation_data=val_data,
+    epochs=EPOCHS
 )
 
-os.makedirs("model", exist_ok=True)
-model.save("model/food_model.h5")
+# -------------------------------
+# 💾 Save Model
+# -------------------------------
+model.save(os.path.join(MODEL_DIR, "food_model.keras"))
+print("\n✅ Model saved successfully!")
 
-with open("model/class_labels.pkl", "wb") as f:
-    pickle.dump(train_data.class_indices, f)
+# -------------------------------
+# 📊 Evaluate Model
+# -------------------------------
+loss, accuracy = model.evaluate(eval_data)
+print(f"\n📊 Evaluation Accuracy: {accuracy * 100:.2f}%")
 
-loss, acc = model.evaluate(test_data)
-print("Test Accuracy:", acc)
+# -------------------------------
+# 📈 Predictions
+# -------------------------------
+predictions = model.predict(eval_data)
+y_pred = np.argmax(predictions, axis=1)
+y_true = eval_data.classes
+
+labels = list(eval_data.class_indices.keys())
+
+# -------------------------------
+# 📋 Classification Report
+# -------------------------------
+print("\n📊 Classification Report:")
+print(classification_report(y_true, y_pred, target_names=labels))
+
+# -------------------------------
+# 🔲 Confusion Matrix
+# -------------------------------
+print("\n📊 Confusion Matrix:")
+print(confusion_matrix(y_true, y_pred))

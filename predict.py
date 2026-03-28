@@ -1,42 +1,49 @@
-# import numpy as np
-# import pickle
-# import tflite_runtime.interpreter as tflite
-# from utils.preprocess import preprocess_image
-# from utils.calorie_data import calories_dict
+import tensorflow as tf
+import numpy as np
+from tensorflow.keras.preprocessing import image
+import pickle
 
-# interpreter = tflite.Interpreter(model_path="model/food_model.tflite")
-# interpreter.allocate_tensors()
+# Load model
+model = tf.keras.models.load_model(
+    "model/food_model.keras",
+    compile=False
+)
 
-# input_details = interpreter.get_input_details()
-# output_details = interpreter.get_output_details()
+# Load labels
+with open("model/class_labels.pkl", "rb") as f:
+    class_labels = pickle.load(f)
 
-# with open("model/class_labels.pkl", "rb") as f:
-#     class_indices = pickle.load(f)
-
-# class_labels = list(class_indices.keys())
-
-# def predict_food(img_path):
-#     img_array = preprocess_image(img_path).astype(np.float32)
-
-#     interpreter.set_tensor(input_details[0]['index'], img_array)
-#     interpreter.invoke()
-
-#     prediction = interpreter.get_tensor(output_details[0]['index'])
-#     class_index = np.argmax(prediction)
-
-#     food = class_labels[class_index]
-#     calories = calories_dict.get(food, "Unknown")
-
-#     return food, calories, prediction
-
-import random
-from utils.calorie_data import calories_dict
-
-foods = list(calories_dict.keys())
+# Calorie mapping
+calorie_dict = {
+    "bread": 265,
+    "dairy_product": 150,
+    "dessert": 300,
+    "egg": 155,
+    "fried_food": 320,
+    "meat": 250,
+    "noodles_pasta": 158,
+    "rice": 130,
+    "seafood": 206,
+    "soup": 80,
+    "vegetable_fruit": 50
+}
 
 def predict_food(img_path):
-    # Dummy prediction (for deployment)
-    food = random.choice(foods)
-    calories = calories_dict.get(food, "Unknown")
+    img = image.load_img(img_path, target_size=(224, 224))
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
 
-    return food, calories, None
+    prediction = model.predict(img_array)
+    predicted_class = class_labels[np.argmax(prediction)]
+
+    calories = calorie_dict.get(predicted_class, "Unknown")
+
+    return predicted_class, calories
+
+
+if __name__ == "__main__":
+    img_path = input("Enter image path: ")
+    food, calories = predict_food(img_path)
+
+    print(f"\n🍽 Predicted Food: {food}")
+    print(f"🔥 Estimated Calories: {calories} kcal")

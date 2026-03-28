@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Food Calorie Estimator</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <script>
+    const form = document.querySelector("form");
+    const spinner = document.getElementById("loadingSpinner");
+
+    form.addEventListener("submit", () => {
+        spinner.style.display = "block";
+    });
+</script>
+    <body>
+        <div class="card">
+            <div class="title">🍽 Food Calorie Estimator</div>
+            <div class="subtitle">Upload a food image and get instant calorie
+                insights powered by TensorFlow</div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="upload-box">
+                    <p><strong>Choose a food image</strong></p>
+                    <input type="file" name="file" required>
+                    <br>
+                    <button class="btn" type="submit">Predict Calories</button>
+                </div>
+            </form>
+            <div class="spinner" id="loadingSpinner"></div>
+            {% if prediction %}
+            <div class="result">
+                <div class="preview">
+                    <img src="{{ image_path }}" alt="Uploaded food image">
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="label">Predicted Food</div>
+                        <div class="value">{{ prediction }}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Estimated Calories</div>
+                        <div class="value">🔥 {{ calories }} kcal</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </body>
+</html>
