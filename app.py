@@ -10,10 +10,16 @@ app = Flask(__name__)
 # -------------------------------
 # Load trained model
 # -------------------------------
-model = tf.keras.models.load_model(
-    "model/food_model.keras",
-    compile=False
-)
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        model = tf.keras.models.load_model(
+            "model/food_model.keras",
+            compile=False
+        )
+    return model
 
 # Load class labels
 with open("model/class_labels.pkl", "rb") as f:
@@ -41,6 +47,8 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 def predict_food(img_path):
+    model = get_model()
+
     img = image.load_img(img_path, target_size=(224, 224))
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
@@ -74,8 +82,6 @@ def index():
         calories=calories,
         image_path=image_path
     )
-
-
 
 
 if __name__ == "__main__":
