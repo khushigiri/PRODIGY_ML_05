@@ -33,15 +33,6 @@ This project focuses on **image classification and inference using TensorFlow** 
 
 ---
 
-## Example Output
-
-Prediction Result
-Food Item      : rice
-Calories       : 200 kcal
-Confidence     : 91.23%
-
----
-
 ## Limitations
 
 * Model can only predict trained food categories
