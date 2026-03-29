@@ -8,9 +8,6 @@ import os
 
 from sklearn.metrics import classification_report, confusion_matrix
 
-# -------------------------------
-# 📁 Paths
-# -------------------------------
 TRAIN_DIR = "dataset/training"
 VAL_DIR = "dataset/validation"
 EVAL_DIR = "dataset/evaluation"
@@ -20,12 +17,8 @@ IMG_SIZE = (224, 224)
 BATCH_SIZE = 32
 EPOCHS = 10
 
-# Create model directory if not exists
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-# -------------------------------
-# 📊 Data Generators
-# -------------------------------
 train_datagen = ImageDataGenerator(
     rescale=1./255,
     rotation_range=20,
@@ -58,9 +51,6 @@ eval_data = eval_datagen.flow_from_directory(
     shuffle=False
 )
 
-# -------------------------------
-# 🏷 Save Class Labels
-# -------------------------------
 class_labels = list(train_data.class_indices.keys())
 
 with open(os.path.join(MODEL_DIR, "class_labels.pkl"), "wb") as f:
@@ -68,21 +58,14 @@ with open(os.path.join(MODEL_DIR, "class_labels.pkl"), "wb") as f:
 
 print("Class labels saved!")
 
-# -------------------------------
-# 🧠 Load Base Model
-# -------------------------------
 base_model = MobileNetV2(
     weights="imagenet",
     include_top=False,
     input_shape=(224, 224, 3)
 )
 
-# Freeze base model
 base_model.trainable = False
 
-# -------------------------------
-# 🏗 Build Model
-# -------------------------------
 model = models.Sequential([
     base_model,
     layers.GlobalAveragePooling2D(),
@@ -92,9 +75,6 @@ model = models.Sequential([
     layers.Dense(len(class_labels), activation="softmax")
 ])
 
-# -------------------------------
-# ⚙ Compile Model
-# -------------------------------
 model.compile(
     optimizer="adam",
     loss="categorical_crossentropy",
@@ -103,44 +83,30 @@ model.compile(
 
 model.summary()
 
-# -------------------------------
-# 🚀 Train Model
-# -------------------------------
 history = model.fit(
     train_data,
     validation_data=val_data,
     epochs=EPOCHS
 )
 
-# -------------------------------
-# 💾 Save Model
-# -------------------------------
+
 model.save(os.path.join(MODEL_DIR, "food_model.keras"))
 print("\nModel saved successfully!")
 
-# -------------------------------
-# 📊 Evaluate Model
-# -------------------------------
 loss, accuracy = model.evaluate(eval_data)
 print(f"\nEvaluation Accuracy: {accuracy * 100:.2f}%")
 
-# -------------------------------
-# 📈 Predictions
-# -------------------------------
+# Predictions
 predictions = model.predict(eval_data)
 y_pred = np.argmax(predictions, axis=1)
 y_true = eval_data.classes
 
 labels = list(eval_data.class_indices.keys())
 
-# -------------------------------
-# 📋 Classification Report
-# -------------------------------
+# Classification Report
 print("\nClassification Report:")
 print(classification_report(y_true, y_pred, target_names=labels))
 
-# -------------------------------
-# 🔲 Confusion Matrix
-# -------------------------------
+# Confusion Matrix
 print("\nConfusion Matrix:")
 print(confusion_matrix(y_true, y_pred))

@@ -4,17 +4,15 @@ from tensorflow.keras.preprocessing import image
 import pickle
 import os
 
-# Load trained model
 model = tf.keras.models.load_model(
     "model/food_model.keras",
     compile=False
 )
 
-# Load class labels
 with open("model/class_labels.pkl", "rb") as f:
     class_labels = pickle.load(f)
 
-# Calorie mapping
+# Calories
 calorie_map = {
     "bread": 265,
     "dairy_product": 150,
@@ -29,7 +27,7 @@ calorie_map = {
     "vegetable_fruit": 80
 }
 
-# Get image path
+# image path
 img_path = input("Enter image path: ").strip()
 
 if not os.path.exists(img_path):
